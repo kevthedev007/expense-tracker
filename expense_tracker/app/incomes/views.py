@@ -7,6 +7,7 @@ from expense_tracker.app.incomes.serializers import (
   IncomeDetailSerializer
 )
 from expense_tracker.util.permissions import IsOwner
+from expense_tracker.util.renderers import ResponseRenderer
 
 # Create your views here.
 class IncomeAPIViewSet(viewsets.ModelViewSet):
@@ -14,6 +15,7 @@ class IncomeAPIViewSet(viewsets.ModelViewSet):
   serializer_class = IncomeDetailSerializer
   permission_classes = [ IsAuthenticated, IsOwner]
   lookup_field = 'pk'
+  renderer_classes = [ResponseRenderer]
   
   def perform_create(self, serializer):
     serializer.save(owner=self.request.user)

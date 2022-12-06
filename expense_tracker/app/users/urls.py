@@ -7,6 +7,6 @@ from expense_tracker.app.users.views import (
 
 urlpatterns = [
   path('register/', RegisterAPIView.as_view(), name='register'),
-  path('verify-email/', VerifyEmailAPIView.as_view(), name='email-verify'),
+  path('email-verify/', VerifyEmailAPIView.as_view(), name='email-verify'),
   path('login/', LoginAPIView.as_view(), name='login')
 ]

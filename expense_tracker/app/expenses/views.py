@@ -7,6 +7,7 @@ from expense_tracker.app.expenses.serializers import (
   ExpenseDetailSerializer
 )
 from expense_tracker.util.permissions import IsOwner
+from expense_tracker.util.renderers import ResponseRenderer
 
 
 
@@ -15,6 +16,7 @@ class ExpenseAPIViewSet(viewsets.ModelViewSet):
   serializer_class = ExpenseDetailSerializer
   permission_classes = [IsAuthenticated, IsOwner]
   lookup_field = 'pk'
+  renderer_classes = [ResponseRenderer]
   
   def perform_create(self, serializer):
     serializer.save(owner=self.request.user)
