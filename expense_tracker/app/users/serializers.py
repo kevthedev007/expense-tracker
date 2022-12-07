@@ -17,16 +17,12 @@ class UserSerializer(serializers.ModelSerializer):
     return get_user_model().objects.create_user(**validated_data)
   
   
-class LoginSerializer(serializers.ModelSerializer):
+class LoginSerializer(serializers.Serializer):
   name = serializers.CharField(max_length=255, read_only=True)
   email = serializers.EmailField(max_length=255)
   password = serializers.CharField(max_length=255, write_only=True)
   tokens = serializers.SerializerMethodField(read_only=True)
-  
-  class Meta:
-    model = User
-    fields = ['email', 'password', 'name', 'tokens']
-    
+      
   def get_tokens(self, obj):
     user = User.objects.get(email=obj['email'])
     refresh = RefreshToken.for_user(user=user)
