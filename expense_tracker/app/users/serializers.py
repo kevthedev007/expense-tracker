@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model, authenticate
 from expense_tracker.app.users.models import User
 
@@ -20,11 +21,19 @@ class LoginSerializer(serializers.ModelSerializer):
   name = serializers.CharField(max_length=255, read_only=True)
   email = serializers.EmailField(max_length=255)
   password = serializers.CharField(max_length=255, write_only=True)
-  tokens = serializers.CharField(max_length=255, read_only=True)
+  tokens = serializers.SerializerMethodField(read_only=True)
   
   class Meta:
     model = User
     fields = ['email', 'password', 'name', 'tokens']
+    
+  def get_tokens(self, obj):
+    user = User.objects.get(email=obj['email'])
+    refresh = RefreshToken.for_user(user=user)
+    return { 
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+          }
     
   def validate(self, attrs):
     email = attrs.get('email', '')
@@ -44,7 +53,6 @@ class LoginSerializer(serializers.ModelSerializer):
     return {
       'email': user.email,
       'name': user.name,
-      'tokens': user.tokens(),
     }
   
 
