@@ -20,5 +20,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/users/', include('expense_tracker.app.users.urls')),
     path('api/v1/expenses/', include('expense_tracker.app.expenses.urls')),
-    path('api/v1/incomes/', include('expense_tracker.app.incomes.urls'))
+    path('api/v1/incomes/', include('expense_tracker.app.incomes.urls')),
+    path('api/v1/stats/', include('expense_tracker.app.stats.urls')),
 ]
