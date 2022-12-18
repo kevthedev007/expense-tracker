@@ -36,19 +36,35 @@ class ExpenseStatsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     return self.queryset.filter(owner = self.request.user)
     
   
-  @action(methods=["GET"], detail=False, url_path="expense-summary")
-  def expense_summary(self, request, *args, **kwargs):
-    month = self.request.query_params.get("month")
-    year = self.request.query_params.get("year")
+  @action(methods=["get"], detail=False, url_path="monthly-expense-summary")
+  def monthly_expense_summary(self, request, *args, **kwargs):
+    month = request.query_params.get("month")
     
-    if not month and not year:
+    if not month:
       return Response({ 'error': "Please select a period"})
     
-    if month:
-      expenses = self.get_queryset().filter(date__month = month)
+    expenses = self.get_queryset().filter(date__month = month)
       
-    if year:
-      expenses = self.get_queryset().filter(date__year = year)
+    if not expenses:
+      return Response({ 'message': 'No Expenses for month'})
+    
+    final = {}
+    categories = list(set(map(lambda a: a.category, expenses)))
+    
+    for expense in expenses:
+      for category in categories:
+        final[category] = get_amount_for_category(expenses, category)
+        
+    return Response({'category_data': final}, status=status.HTTP_200_OK)
+  
+  @action(methods=["get"], detail=False, url_path="yearly-expense-summary")
+  def yearly_expense_summary(self, request, *args, **kwargs):
+    year = request.query_params.get("year")
+    
+    if not year:
+      return Response({ 'error': "Please select a period"})
+      
+    expenses = self.get_queryset().filter(date__year = year)
     
     if not expenses:
       return Response({ 'message': 'No Expenses for month'})
@@ -72,19 +88,35 @@ class IncomeStatsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
   def get_queryset(self):
     return self.queryset.filter(owner = self.request.user)
   
-  @action(methods=['GET'], detail=False, url_path='income-summary')
-  def income_summary(self, request, *args, **kwargs):
-    month = self.request.query_params.get("month")
-    year = self.request.query_params.get("year")
-    
-    if not month and not year:
+  @action(methods=['get'], detail=False, url_path='monthly-income-summary')
+  def monthly_income_summary(self, request, *args, **kwargs):
+    month = request.query_params.get("month")
+ 
+    if not month:
       return Response({ 'error': "Please select a period"})
+  
+    incomes = self.get_queryset().filter(date__month = month)
     
-    if month:
-      incomes = self.get_queryset().filter(date__month = month)
+    if not incomes:
+      return Response({ 'message': 'No Income for month'})
+    
+    final = {}
+    sources = list(set(map(lambda a: a.source, incomes)))
+    
+    for income in incomes:
+      for source in sources:
+        final[source] = get_amount_from_source(incomes, source)
+        
+    return Response({'income_source_data': final}, status=status.HTTP_200_OK)
+  
+  @action(methods=['get'], detail=False, url_path='yearly-income-summary')
+  def yearly_income_summary(self, request, *args, **kwargs):
+    year = request.query_params.get("year")
+    
+    if not year:
+      return Response({ 'error': "Please select a period"})
       
-    if year:
-      incomes = self.get_queryset().filter(date__year = year)
+    incomes = self.get_queryset().filter(date__year = year)
     
     if not incomes:
       return Response({ 'message': 'No Income for month'})
